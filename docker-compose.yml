@@ -1,0 +1,53 @@
+version: '3.1'
+services:
+  redis-local:
+    image: redis:4.0
+    ports:
+      - ${EXTERNAL_PORT_REDIS:-6379}:6379
+    healthcheck:
+      interval: 30s
+      timeout: 30s
+      retries: 10
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=redis-local
+    ports:
+      - 8881:8081
+    depends_on:
+      redis-local:
+        condition: service_started
+
+  mysql-local:
+    image: mysql:8.0.17
+    #command: --init-file /data/application/init.sql
+    command: --init-file /data/application/init.sql --default-authentication-plugin=mysql_native_password
+    restart: always
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=pass < /data/application/healthcheck.sql"
+      interval: 2s
+      timeout: 20s
+      retries: 10
+    volumes:
+      - ./data/mysql/init.sql:/data/application/init.sql
+      - ./data/mysql/healthcheck.sql:/data/application/healthcheck.sql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 'pass'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'pass'
+
+  wait-for-services:
+    image: mysql:8.0.17 # this is just a temporary image to have something instead of Dockerfile
+    entrypoint: '
+      echo "SERVICES ARE READY"
+    '
+    depends_on:
+      redis-local:
+        condition: service_started
+      mysql-local:
+        condition: service_healthy
+    tty: true

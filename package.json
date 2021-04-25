@@ -1,0 +1,19 @@
+{
+  "name": "docker-images",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "docker:wait": "docker-compose up wait-for-services"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexander-shestmintsev/docker-images.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexander-shestmintsev/docker-images/issues"
+  },
+  "homepage": "https://github.com/alexander-shestmintsev/docker-images#readme"
+}
